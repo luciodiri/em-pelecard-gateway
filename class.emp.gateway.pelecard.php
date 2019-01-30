@@ -242,10 +242,21 @@ class EM_Gateway_Pelecard extends EM_Gateway {
         $note = 'Txn id:' . $pelecard_input["transaction_id"];
 
         $this->record_transaction($EM_Booking, $price, $currency, $timestamp, $txn_id, $status, $note);
-        $EM_Booking->approve(true, true);
+
+        // Optional: validate if the full amount was paid
+        //        if( $price >= $EM_Booking->get_price() && (!get_option('em_'.$this->gateway.'_manual_approval', false) || !get_option('dbem_bookings_approval')) ){
+        //            $EM_Booking->approve(true, true); //approve and ignore spaces
+        //        }else{
+        //            // do something if pp payment not enough
+        //            $EM_Booking->set_status(4); //Set back to normal "pending"
+        //        }
+
+        $EM_Booking->approve(true, true); //approve and ignore spaces
         do_action('em_payment_processed', $EM_Booking, $this);
+
         $location = site_url( get_option('em_'. $this->gateway . '_pelecard_thank_you_page'), 'thank-you' );
         wp_safe_redirect($location);
+
         exit();
     }
 
