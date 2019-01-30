@@ -222,7 +222,7 @@ class EM_Gateway_Pelecard extends EM_Gateway {
                 $EM_Booking->manage_override = true; //since we're overriding the booking ourselves.
 //                $user_id = $EM_Booking->person_id;
 
-                // process Pelecard response
+                // process Pelecard response, transactions and booking status
                 $this->handle_payment_status($EM_Booking, $pelecard_input, $price);
             }
         }
@@ -254,10 +254,26 @@ class EM_Gateway_Pelecard extends EM_Gateway {
         $EM_Booking->approve(true, true); //approve and ignore spaces
         do_action('em_payment_processed', $EM_Booking, $this);
 
+        // send confirmation email
+//        $this->send_confirmation_email($EM_Booking);
+
         $location = site_url( get_option('em_'. $this->gateway . '_pelecard_thank_you_page'), 'thank-you' );
         wp_safe_redirect($location);
 
         exit();
+    }
+
+    /**
+     * Send booking confirmation mail
+     * @return bool
+     */
+    private function send_confirmation_email($EM_Booking) {
+        $message_vars = array();
+        $message_vars['email'] = $EM_Booking->get_person()->user_email;
+        $message_vars['first_name'] = $EM_Booking->get_person()->first_name;
+        $message_vars['last_name'] = $EM_Booking->get_person()->last_name;
+//        wp_mail();
+        return true;
     }
 
     /**
