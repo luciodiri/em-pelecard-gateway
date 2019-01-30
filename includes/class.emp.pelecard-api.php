@@ -2,10 +2,8 @@
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly
 
 /**
- * Created by PhpStorm.
- * User: Shushka
- * Date: 1/24/2019
- * Time: 10:44 AM
+ * Pelecard API helper functions
+ * taken from Pelecard Woocomerce plugin by: @https://profiles.wordpress.org/idofri/
  */
 class EM_Pelecard_Api
 {
@@ -16,7 +14,7 @@ class EM_Pelecard_Api
      * @param  array  $request
      * @param  string $scheme
      * @param  string $method
-     * @return array|void
+     * @return array|bool
      */
     public static function request( $request, $scheme = 'PaymentGW/init', $method = 'POST' ) {
         $api_response = wp_remote_post(
@@ -32,7 +30,7 @@ class EM_Pelecard_Api
 
         if ( is_wp_error( $api_response ) ) {
             $error_message = $api_response->get_error_message();
-//            WC_Pelecard::log( $error_message );
+            EM_Pro::log( array('PelecardInitGatewayError', 'WP_Error'=> $api_response, 'Error Message' => $error_message) );
 
             // Enable Debug logging to the /wp-content/debug.log file
             if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
@@ -43,8 +41,7 @@ class EM_Pelecard_Api
             if ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) {
 //                wc_add_notice( $error_message, 'error' );
             }
-
-            return;
+            return false;
         }
 
         return json_decode( wp_remote_retrieve_body( $api_response ), true );
