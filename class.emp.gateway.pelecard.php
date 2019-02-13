@@ -6,15 +6,19 @@
 
 class EM_Gateway_Pelecard extends EM_Gateway {
 
-    var $gateway = 'emp_pelecard';
-    var $title = 'Pelecard';
-    var $status = 4;
-    var $status_txt = 'Processing (Pelecrad)';
-    var $payment_return = true; // flag for processing verification reqyests fro GW
-    var $button_enabled = false; //we can's use a button here
-    var $supports_multiple_bookings = false;
-    var $registered_timer = 0;
-    var $pelecard_txn_validation_url = "https://gateway20.pelecard.biz/PaymentGW/ValidateByUniqueKey";
+    public $gateway = 'emp_pelecard';
+    public $title = 'Pelecard';
+    public $status = 4;
+    public $status_txt = 'Processing (Pelecrad)';
+    public $payment_return = true; // flag for processing verification reqyests fro GW
+    public $button_enabled = false; //we can's use a button here
+    public $supports_multiple_bookings = false;
+    public $registered_timer = 0;
+    public $pelecard_txn_validation_url = "https://gateway20.pelecard.biz/PaymentGW/ValidateByUniqueKey";
+    public $pelecard_logo_path = 'https://iyengar-yoga.org.il.rozitta.com/wp-content/uploads/2019/02/עמותת-איינגאר-לוגו-פלאכרד.jpg';
+//    public $pelecard_css_url = '';
+    public $pelecard_payment_page_top_text = 'לצורך השלמת תהליך ההרשמה נא להשלים את התשלום בכרטיס אשראי';
+    public $pelecard_payment_page_bottom_text = 'לאחר התשלום תועברו בחזרה לאתר העמותה לאיינגאר יוגה. נא לא לסגור את הדפדפן עד להשלמת התהליך. תודה';
 
     function __construct() {
         parent::__construct();
@@ -205,8 +209,8 @@ class EM_Gateway_Pelecard extends EM_Gateway {
             // get params and validate transaction with Pelecard
             $booking_details = explode(':',$_REQUEST['ParamX']);
             $pelecard_input = array(
-                "status_code" => $_REQUEST[PelecardStatusCode],
-                "approval_number" => $_REQUEST[ApprovalNo],
+                "status_code" => $_REQUEST["PelecardStatusCode"],
+                "approval_number" => $_REQUEST["ApprovalNo"],
                 "transaction_id" => $_REQUEST["PelecardTransactionId"],
                 "confirmation_key" => $_REQUEST["ConfirmationKey"],
                 "booking_id" => $booking_details[0],
@@ -327,7 +331,11 @@ class EM_Gateway_Pelecard extends EM_Gateway {
             "Currency" => 1, // always ILS
             "total" => $EM_Booking->booking_price * 100, //price in cents
             // use ParamX to identify the booking when confirmation returns
-            'ParamX' => $EM_Booking->booking_id.':'.$EM_Booking->event_id
+            'ParamX' => $EM_Booking->booking_id.':'.$EM_Booking->event_id,
+            'FeedbackDataTransferMethod' => 'POST',
+            'LogoURL' => $this->pelecard_logo_path,
+            'topText' => $this->pelecard_payment_page_top_text,
+            'BottomText' => $this->pelecard_payment_page_bottom_text
         );
         $response = EM_Pelecard_Api::request($args);
         if($response) {
